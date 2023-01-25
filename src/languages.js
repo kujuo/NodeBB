@@ -30,18 +30,12 @@ function get(language, namespace) {
             throw new Error('[[error:invalid-path]]');
         }
         const data = yield fs_1.default.promises.readFile(pathToLanguageFile, 'utf8');
-        // console.log(data);
         const parsed = JSON.parse(data) || {};
-        console.log('parsed');
-        console.log(parsed);
-        // const pee: JSON = {};
         const result = yield plugins_1.default.hooks.fire('filter:languages.get', {
             language,
             namespace,
             data: parsed,
         });
-        console.log('data');
-        console.log(result.data);
         return result.data;
     });
 }
@@ -56,7 +50,6 @@ function listCodes() {
             const file = yield fs_1.default.promises.readFile(path_1.default.join(languagesPath, 'metadata.json'), 'utf8');
             const parsed = JSON.parse(file);
             codeCache = parsed.languages;
-            console.log(codeCache);
             return parsed.languages;
         }
         catch (err) {
@@ -64,11 +57,6 @@ function listCodes() {
                 return [];
             }
             throw err;
-            // if (err instanceof Error) {
-            //     if (err.code === 'ENOENT')
-            //     return [];
-            // }
-            // throw err;
         }
     });
 }

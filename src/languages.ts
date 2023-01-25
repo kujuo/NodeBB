@@ -15,8 +15,15 @@ type LanguageData = {
     dir: string,
 }
 
-interface IDictionary {
-    [index:string]: string;
+interface LanguageResult {
+    language: string,
+    namespace: string
+    data: Record<string, string>
+}
+
+interface LanguageOptions {
+    languages: string[],
+    namespaces: string[]
 }
 
 // const Languages = module.exports;
@@ -26,24 +33,20 @@ const files: string[] = fs.readdirSync(path.join(paths.nodeModules, '/timeago/lo
 // Languages.timeagoCodes = files.filter(f => f.startsWith('jquery.timeago')).map(f => f.split('.')[2]);
 const timeagoCodes: string[] = files.filter(f => f.startsWith('jquery.timeago')).map(f => f.split('.')[2]);
 
-export async function get(language: string, namespace: string): Promise<object> {
+export async function get(language: string, namespace: string): Promise<Record<string, string>> {
     const pathToLanguageFile: string = path.join(languagesPath, language, `${namespace}.json`);
     if (!pathToLanguageFile.startsWith(languagesPath)) {
         throw new Error('[[error:invalid-path]]');
     }
     const data: string = await fs.promises.readFile(pathToLanguageFile, 'utf8');
-    // console.log(data);
-    const parsed: IDictionary = JSON.parse(data) as IDictionary || {};
-    // console.log('parsed');
-    // console.log(parsed);
 
-    const result = await plugins.hooks.fire('filter:languages.get', {
+    const parsed: Record<string, string> = JSON.parse(data) as Record<string, string> || {};
+
+    const result: LanguageResult = await plugins.hooks.fire('filter:languages.get', {
         language,
         namespace,
         data: parsed,
-    });
-    // console.log('data');
-    // console.log(result.data);
+    }) as LanguageResult;
     return result.data;
 }
 
@@ -54,21 +57,14 @@ export async function listCodes(): Promise<string[]> {
     }
     try {
         const file: string = await fs.promises.readFile(path.join(languagesPath, 'metadata.json'), 'utf8');
-        const parsed = JSON.parse(file);
-
+        const parsed: LanguageOptions = JSON.parse(file) as LanguageOptions;
         codeCache = parsed.languages;
-        console.log(codeCache);
         return parsed.languages;
     } catch (err: unknown) {
         if ((err as NodeJS.ErrnoException).code === 'EN0ENT') {
             return [];
         }
         throw err;
-        // if (err instanceof Error) {
-        //     if (err.code === 'ENOENT')
-        //     return [];
-        // }
-        // throw err;
     }
 }
 
