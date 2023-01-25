@@ -4,24 +4,19 @@ import utils from './utils';
 import { paths } from './constants';
 import plugins from './plugins';
 
-// interface Error {
-//     status?: number;
-//     code?: number;
-// }
-
 type LanguageData = {
     name: string,
     code: string,
     dir: string,
 }
 
-interface LanguageResult {
+type LanguageResult = {
     language: string,
     namespace: string
     data: Record<string, string>
 }
 
-interface LanguageOptions {
+type LanguageOptions = {
     languages: string[],
     namespaces: string[]
 }
