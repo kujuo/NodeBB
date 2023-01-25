@@ -21,11 +21,10 @@ type LanguageOptions = {
     namespaces: string[]
 }
 
-// const Languages = module.exports;
 const languagesPath: string = path.join(__dirname, '../build/public/language');
 
 const files: string[] = fs.readdirSync(path.join(paths.nodeModules, '/timeago/locales'));
-// Languages.timeagoCodes = files.filter(f => f.startsWith('jquery.timeago')).map(f => f.split('.')[2]);
+
 const timeagoCodes: string[] = files.filter(f => f.startsWith('jquery.timeago')).map(f => f.split('.')[2]);
 
 export async function get(language: string, namespace: string): Promise<Record<string, string>> {
