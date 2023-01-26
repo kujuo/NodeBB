@@ -43,6 +43,10 @@ export async function get(language: string, namespace: string): Promise<Record<s
     }) as LanguageResult;
     return result.data;
 }
+// https://stackoverflow.com/questions/69422525/in-typescript-try-catch-error-object-shows-object-is-of-type-unknown-ts25
+function isErrnoException(e: unknown): e is NodeJS.ErrnoException {
+    return e instanceof Error;
+}
 
 let codeCache: string[] = null;
 export async function listCodes(): Promise<string[]> {
@@ -55,10 +59,12 @@ export async function listCodes(): Promise<string[]> {
         codeCache = parsed.languages;
         return parsed.languages;
     } catch (err: unknown) {
-        if ((err as NodeJS.ErrnoException).code === 'EN0ENT') {
-            return [];
+        if (isErrnoException(err)) {
+            if (err.code === 'ENOENT') {
+                return [];
+            }
+            throw err;
         }
-        throw err;
     }
 }
 
@@ -78,10 +84,12 @@ export async function list(): Promise<LanguageData[]> {
             const lang: LanguageData = JSON.parse(file) as LanguageData;
             return lang;
         } catch (err: unknown) {
-            if ((err as NodeJS.ErrnoException).code === 'EN0ENT') {
-                return;
+            if (isErrnoException(err)) {
+                if (err.code === 'ENOENT') {
+                    return;
+                }
+                throw err;
             }
-            throw err;
         }
     }));
 

@@ -18,10 +18,8 @@ const path_1 = __importDefault(require("path"));
 const utils_1 = __importDefault(require("./utils"));
 const constants_1 = require("./constants");
 const plugins_1 = __importDefault(require("./plugins"));
-// const Languages = module.exports;
 const languagesPath = path_1.default.join(__dirname, '../build/public/language');
 const files = fs_1.default.readdirSync(path_1.default.join(constants_1.paths.nodeModules, '/timeago/locales'));
-// Languages.timeagoCodes = files.filter(f => f.startsWith('jquery.timeago')).map(f => f.split('.')[2]);
 const timeagoCodes = files.filter(f => f.startsWith('jquery.timeago')).map(f => f.split('.')[2]);
 function get(language, namespace) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -40,6 +38,10 @@ function get(language, namespace) {
     });
 }
 exports.get = get;
+// https://stackoverflow.com/questions/69422525/in-typescript-try-catch-error-object-shows-object-is-of-type-unknown-ts25
+function isErrnoException(e) {
+    return e instanceof Error;
+}
 let codeCache = null;
 function listCodes() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -53,10 +55,12 @@ function listCodes() {
             return parsed.languages;
         }
         catch (err) {
-            if (err.code === 'EN0ENT') {
-                return [];
+            if (isErrnoException(err)) {
+                if (err.code === 'ENOENT') {
+                    return [];
+                }
+                throw err;
             }
-            throw err;
         }
     });
 }
@@ -77,10 +81,12 @@ function list() {
                 return lang;
             }
             catch (err) {
-                if (err.code === 'EN0ENT') {
-                    return;
+                if (isErrnoException(err)) {
+                    if (err.code === 'ENOENT') {
+                        return;
+                    }
+                    throw err;
                 }
-                throw err;
             }
         })));
         // filter out invalid ones
